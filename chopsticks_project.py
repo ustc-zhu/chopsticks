@@ -595,6 +595,7 @@ class GamePlayPage(tk.Frame):
         
         def changeturn():            
             childturn = P1 if turn == P2 else P2
+            #time.sleep(2)
             return childturn
         def SetupBoard(position):
             print("#turn:",turn,"#position:",game_position, "#gametype:", gametype)
@@ -604,8 +605,14 @@ class GamePlayPage(tk.Frame):
             #time.sleep(2)
             if gametype == COM and turn == P2:
                 #time.sleep(2)
-                child = Remoteness[position][1]
-                HandleMove({"child":child, "turn": P1})(1)
+                for i in range(len(arrows)):
+                    child = DoMove2(position,arrows_move[arrows[i]])
+                    childturn = changeturn()
+                    c.itemconfig(arrows[i], fill=value_to_color[MoveValueSwap(Record[child][index_state])])
+                    if child == Remoteness[position][1]:
+                        c.itemconfig(arrows[i], outline='black')
+                        c.tag_bind(arrows[i], sequence="<Button-1>", func=HandleMove({"move":arrows_move[arrows[i]],"parent":position,"child":child, "turn": childturn}))
+        
                 
             else:
                 for i in range(len(arrows)):
