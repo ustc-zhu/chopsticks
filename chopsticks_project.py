@@ -359,7 +359,7 @@ class GamePlayPage(tk.Frame):
         # Function to generate string for remoteness
         def PredictionStr(game_position):
             if Record[game_position][index_state] != DRAW:
-                return turn + "should win\n in "+str(Remoteness[game_position][0])+ " moves"
+                return turn+" " + "should "+Record[game_position][index_state] + "\n in "+str(Remoteness[game_position][0])+ " moves"
             else: return "DRAW!!!"
         
         def MoveValueSwap(value):
