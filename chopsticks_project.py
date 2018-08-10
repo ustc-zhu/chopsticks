@@ -1,8 +1,47 @@
+from tkinter import *
+import tkinter as tk
+import math
+import random
+
+global turn, gametype, regionRule
+global p1name,p2name
+
+p1name = "Player 1"
+p2name = "Player 2"
+
+P1 = 'player1' 
+P2 = 'player2'
+
+turn = P1
+game_position = (1,1,1,1)
 
 WIN = 'win'
 LOSE = 'lose'
 DRAW = 'draw'
 UNDECIDED = 'undecided' 
+
+value_to_color = {WIN:"darkgreen",LOSE:"red",DRAW:"yellow"}
+
+COM = 'computer'
+HUMAN='human'
+
+gametype = UNDECIDED
+
+
+game_position = (1,1,1,1)
+
+arrow_tag1 = 'arrowtag1'
+arrow_tag2 = 'arrowtag2'
+arrow_tag3 = 'arrowtag3'
+arrow_tag4 = 'arrowtag4'
+arrow_tag5 = 'arrowtag5'
+arrow_tag6 = 'arrowtag6'
+arrow_tag7 = 'arrowtag7'
+arrow_tag8 = 'arrowtag8'
+
+
+arrows = []
+arrows_move = {}
 
 maxnum = 10
 
@@ -193,17 +232,7 @@ def Name2(name):
     print(name)
     p2name=name
 
-def versusPlayer2():
-    print("vs P2")
-
-def versusComp():
-    global p2name
-    p2name = "Computer"
-    print("vs Comp")
-    
-
 LARGE_FONT= ("Verdana", 12)
-global p1name, p2name, secondplayer
 p1name = "Player 1"
 p2name = "Player 2"
 
@@ -236,12 +265,6 @@ class App(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
 
-#*1 def qf(stringtoprint):
-# *1    print(stringtoprint)
-
-def qf(param):
-    print(param)
-
 class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -249,12 +272,6 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text="Start Page", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
         
-        # Create a button that reacts when you click
-        # *1 If you do it this way, it will run on load, not when you click
-        # use lambda function instead
-        # button1 = tk.Button(self, text = "Visit Page 1", command = qf("yo!"))
-#        button1 = tk.Button(self, text = "New Game", 
- #                           command = lambda: qf("Go to select Mode"))
         button1 = tk.Button(self, text = "New Game", 
                             command = lambda: controller.show_frame(ModeSelectPage))
         button1.pack()
@@ -267,26 +284,73 @@ class OptionPage(tk.Frame):
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        def Name1(name):
+            global p1name
+            p1name=name
+#            entryName1.destroy()
+            return
+
+        def Name2(name):
+            global p2name
+            p2name=name
+#            entryName2.destroy()
+            return
         
-        label1 = tk.Label(self, text = "1P's Name: ")
-        label2 = tk.Label(self, text = "2P's Name: ")
-        entryName1 = tk.Entry(self)
-        entryName2 = tk.Entry(self)
-        saveName1 = tk.Button(self, text = "Save",
+        fm = tk.Frame(self)
+        label1 = tk.Label(fm, text = "(on construction)1P's Name: ")
+        entryName1 = tk.Entry(fm)
+        saveName1 = tk.Button(fm, text = "Save",
                               command = lambda: Name1(entryName1.get()))
-        print(str(entryName1))
-        saveName2 = tk.Button(self, text = "Save", command =lambda: Name2(entryName2.get()))
+        label1.pack(side=LEFT, anchor=W, fill=X, expand=YES)
+        entryName1.pack(side=LEFT, anchor=W, fill=X, expand=YES)
+        saveName1.pack(side=LEFT, anchor=W, fill=X, expand=YES)     
+        fm.pack(side=TOP, anchor=W)
+        
+        fm2 = tk.Frame(self)
+        label2 = tk.Label(fm2, text = "(on construction)2P's Name: ")
+        entryName2 = tk.Entry(fm2)
+        saveName2 = tk.Button(fm2, text = "Save", 
+                              command = lambda: Name2(entryName2.get()))
+        label2.pack(side=LEFT, anchor=W, fill=X, expand=YES)
+        entryName2.pack(side=LEFT, anchor=W, fill=X, expand=YES)
+        saveName2.pack(side=LEFT, anchor=W, fill=X, expand=YES)
+        fm2.pack(side=TOP, anchor=W)
+
+        fm3 = tk.Frame(self)
+        self.rule = StringVar()
+        self.rule.set("Chinese") #default mode is China rule
+
+        rule1 = tk.Radiobutton(fm3, text="China Rules", variable=self.rule, value="Chinese",
+                              command=self.updateRule).pack(anchor=W)
+        rule2 = tk.Radiobutton(fm3, text="USA Rules (on construction)", variable=self.rule, value="USA",
+                              command=self.updateRule).pack(anchor=W)
+        fm3.pack(side=TOP)
+        
+        self.ruleText1 = Text(self, width =70, height=10, wrap=WORD)
+        self.ruleText1.pack()
         button3 = tk.Button(self, text = "Back",
                             command = lambda: controller.show_frame(StartPage))
-        
-        label1.grid(row = 3, column = 0)
-        label2.grid(row = 4, column = 0)
-        entryName1.grid(row = 3, column = 1)
-        entryName2.grid(row = 4, column = 1)
-        saveName1.grid(row = 3, column = 2)
-        saveName2.grid(row = 4, column = 2)
-        button3.place(x=150 ,y=60)
-        
+        button3.pack()
+     
+    def updateRule(self):
+        global regionRule
+        self.ruleText1.delete(0.0,END)
+        if self.rule.get()=="Chinese":
+            message="(Chinese)Each player tap other player's hand and \n\
+add the number of fingers from the tapped hand to their own fingers. \n\
+If the sum of fingers in one hand = 10, that hand is liberated. \n\
+The if the sum of the fingers is more than ten, substract the fingers with 10. \n\
+The first player who gets both hands liberated is the winner."
+            regionRule="CH"
+        else:
+            message="(USA)Each player tap other player's hand \n\
+player can add the number of opponents' fingers by giving the fingers from their own. \n\
+You can split the numbers of your fingers by touching your own hand. \n\
+If the sum of fingers in one hand is bigger than 5, that hand is dead. \n\
+You will win if both of your opponent's hand are dead."
+            regionRule="USA"
+        self.ruleText1.insert(0.0, message)
+        return        
 gametype = UNDECIDED
         
         
@@ -315,9 +379,7 @@ class ModeSelectPage(tk.Frame):
     def vshuman(self):
         global gametype
         self.controller.show_frame(GamePlayPage)
-        gametype = HUMAN
-
-    
+        gametype = HUMAN    
         
 p1name = "Player 1"
 p2name = "Player 2"
@@ -345,11 +407,11 @@ class GamePlayPage(tk.Frame):
     print("turn:",turn,"position:",game_position)
     
     def __init__(self, parent, controller):
+        
         global turn, game_position
         tk.Frame.__init__(self, parent)
         
-        
-        c = tk.Canvas(self, width=400, height=300)
+        c = tk.Canvas(self, width=400, height=280, bg="white")
         c.pack()
         
     # Function to update text into canvas text
@@ -377,15 +439,15 @@ class GamePlayPage(tk.Frame):
         lhand = c.create_text(30,75, text="LH")
         rhand = c.create_text(30,175, text="RH")
     
-        left1= c.create_oval(50, 50, 120, 120, fill="grey")
+        left1= c.create_oval(50, 50, 120, 120, fill="blue", outline="")
                 
-        right1= c.create_oval(50, 150, 120, 220, fill="grey")
+        right1= c.create_oval(50, 150, 120, 220, fill="blue", outline="")
 
-        left_num_1 = c.create_text(85,85, text=str(game_position[0]))
+        left_num_1 = c.create_text(85,85, text=str(game_position[0]), fill = 'white')
         c.itemconfig(left_num_1, tags=("left_num_1"+"tag"))
         
         
-        right_num_1 = c.create_text(85,185, text=str(game_position[1]))
+        right_num_1 = c.create_text(85,185, text=str(game_position[1]), fill = 'white')
         c.itemconfig(right_num_1, tags=("right_num_1"+"tag"))
 
         
@@ -394,15 +456,15 @@ class GamePlayPage(tk.Frame):
         lhand2 = c.create_text(360,75, text="LH")
         rhand2 = c.create_text(360,175, text="RH")
 
-        left2= c.create_oval(270, 50, 340, 120, fill="grey")
+        left2= c.create_oval(270, 50, 340, 120, fill="red", outline="")
 
-        right2= c.create_oval(270, 150, 340, 220, fill="grey")
+        right2= c.create_oval(270, 150, 340, 220, fill="red", outline="")
 
-        left_num_2 = c.create_text(305,85, text=str(game_position[2]))
+        left_num_2 = c.create_text(305,85, text=str(game_position[2]),fill = 'white')
         c.itemconfig(left_num_2, tags=("left_num_2"+"tag"))
         #print(c.gettags(left_num_2))
 
-        right_num_2 = c.create_text(305.5,185, text=str(game_position[3]))
+        right_num_2 = c.create_text(305.5,185, text=str(game_position[3]), fill = 'white')
         c.itemconfig(right_num_2, tags=("right_num_2"+"tag"))
 
        
@@ -581,13 +643,6 @@ class GamePlayPage(tk.Frame):
                     arrows.append(arrow8)
                     arrows_move[arrow8] = [0, game_position[3]]
         
-        #var=IntVar()
-       
-        
-        def cb(self, event):
-            print("variable is", self.var.get())
-        #solverbox = tk.Checkbutton(, text="Solve", variable = var, command = cb)
-#        solverbox.pack()
         def DoMove2(Position, Move):#chopsticks Position =(U_L,U_R,O_L,O_R)
             #print(turn)
             New_Position = (Position[2], Position[3], (Position[0] + Move[0])%maxnum, (Position[1] + Move[1]) % maxnum)
@@ -618,6 +673,8 @@ class GamePlayPage(tk.Frame):
                 for i in range(len(arrows)):
                     child = DoMove2(position,arrows_move[arrows[i]])
                     childturn = changeturn()
+                    if child == Remoteness[position][1]:
+                        c.itemconfig(arrows[i], outline='black')
                     c.itemconfig(arrows[i], fill=value_to_color[MoveValueSwap(Record[child][index_state])])
                     c.tag_bind(arrows[i], sequence="<Button-1>", func=HandleMove({"move":arrows_move[arrows[i]],"parent":position,"child":child, "turn": childturn}))
         
@@ -656,7 +713,6 @@ class GamePlayPage(tk.Frame):
         
         SetupBoard(game_position)
         
-
 app = App()
 app.geometry("400x300")
 app.mainloop()
